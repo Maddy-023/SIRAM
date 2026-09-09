@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: SIRAM - Emergencias API
+  description: >
+    API REST del microservicio de Emergencias de SIRAM (Sistema Integrado
+    para el Registro y Atención de Emergencias Municipales). Permite al
+    ciudadano registrar un incidente sin necesidad de autenticación, y
+    publica el evento correspondiente en Kafka para que el microservicio
+    de Notificación determine la entidad responsable.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8081
+    description: Entorno local (Docker Compose)
+
+paths:
+  /api/incidentes:
+    post:
+      summary: Registrar un nuevo incidente
+      description: >
+        Registra el incidente reportado por el ciudadano, lo persiste en
+        base de datos y publica el evento `incident-reported` en Kafka.
+      operationId: registrarIncidente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidenteInput'
+      responses:
+        '201':
+          description: Incidente registrado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incidente'
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      summary: Consultar incidentes registrados
+      description: >
+        Consulta de uso interno/auditoría. No está expuesta al ciudadano
+        en la interfaz de reporte.
+      operationId: listarIncidentes
+      parameters:
+        - name: tipo
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TipoIncidente'
+        - name: fecha
+          in: query
+          required: false
+          description: Fecha del reporte en formato YYYY-MM-DD
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Listado de incidentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Incidente'
+
+components:
+  schemas:
+    TipoIncidente:
+      type: string
+      enum:
+        - HURTO
+        - ACCIDENTE_TRANSITO
+        - INCENDIO
+        - SISMO
+        - INUNDACION
+        - OTRO
+
+    Coordenadas:
+      type: object
+      required:
+        - latitud
+        - longitud
+      properties:
+        latitud:
+          type: number
+          format: double
+          example: 2.9273
+        longitud:
+          type: number
+          format: double
+          example: -75.2819
+
+    IncidenteInput:
+      type: object
+      required:
+        - tipo
+        - ubicacion
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoIncidente'
+        ubicacion:
+          $ref: '#/components/schemas/Coordenadas'
+
+    Incidente:
+      allOf:
+        - $ref: '#/components/schemas/IncidenteInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            fechaHora:
+              type: string
+              format: date-time
+
+    Error:
+      type: object
+      properties:
+        mensaje:
+          type: string
+        detalle:
+          type: string
