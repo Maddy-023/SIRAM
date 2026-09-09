@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: siram-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: siram-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  emergencias-db:
+    image: postgres:16
+    container_name: siram-emergencias-db
+    environment:
+      POSTGRES_DB: emergencias_db
+      POSTGRES_USER: siram
+      POSTGRES_PASSWORD: siram
+    ports:
+      - "5432:5432"
+    volumes:
+      - emergencias-db-data:/var/lib/postgresql/data
+
+  emergencias-service:
+    build: ./emergencias-service
+    container_name: siram-emergencias-service
+    depends_on:
+      - emergencias-db
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://emergencias-db:5432/emergencias_db
+      SPRING_DATASOURCE_USERNAME: siram
+      SPRING_DATASOURCE_PASSWORD: siram
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  notificacion-db:
+    image: postgres:16
+    container_name: siram-notificacion-db
+    environment:
+      POSTGRES_DB: notificacion_db
+      POSTGRES_USER: siram
+      POSTGRES_PASSWORD: siram
+    ports:
+      - "5433:5432"
+    volumes:
+      - notificacion-db-data:/var/lib/postgresql/data
+
+  notificacion-service:
+    build: ./notificacion-service
+    container_name: siram-notificacion-service
+    depends_on:
+      - kafka
+      - notificacion-db
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: notificacion-group
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notificacion-db:5432/notificacion_db
+      SPRING_DATASOURCE_USERNAME: siram
+      SPRING_DATASOURCE_PASSWORD: siram
+
+  graphql-gateway:
+    build: ./graphql-gateway
+    container_name: siram-graphql-gateway
+    depends_on:
+      - emergencias-service
+    ports:
+      - "8080:8080"
+    environment:
+      EMERGENCIAS_SERVICE_URL: http://emergencias-service:8081
+
+volumes:
+  emergencias-db-data:
+  notificacion-db-data:
