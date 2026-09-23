@@ -1,0 +1,37 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notificacion-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/notificacion_db}
+    username: ${SPRING_DATASOURCE_USERNAME:siram}
+    password: ${SPRING_DATASOURCE_PASSWORD:siram}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:notificacion-group}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        "[spring.json.trusted.packages]": "*"
+
+# Mapeo interno de entidades y teléfonos simulados (sección 11.5 del documento)
+mapeo:
+  entidades:
+    HURTO: POLICIA
+    ACCIDENTE_TRANSITO: POLICIA
+    INCENDIO: BOMBEROS
+    SISMO: CENTRAL_RIESGOS
+    INUNDACION: CENTRAL_RIESGOS
+    OTRO: POLICIA
+  telefonos:
+    POLICIA: "+573001234567"
+    BOMBEROS: "+573007654321"
+    CENTRAL_RIESGOS: "+573009998877"

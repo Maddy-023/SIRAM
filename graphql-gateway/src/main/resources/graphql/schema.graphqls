@@ -1,0 +1,38 @@
+enum TipoIncidente {
+    HURTO
+    ACCIDENTE_TRANSITO
+    INCENDIO
+    SISMO
+    INUNDACION
+    OTRO
+}
+
+type Coordenadas {
+    latitud: Float!
+    longitud: Float!
+}
+
+input CoordenadasInput {
+    latitud: Float!
+    longitud: Float!
+}
+
+input ReportarIncidenteInput {
+    tipo: TipoIncidente!
+    ubicacion: CoordenadasInput!
+}
+
+type Incidente {
+    id: ID!
+    tipo: TipoIncidente!
+    ubicacion: Coordenadas!
+    fechaHora: String!
+}
+
+type Query {
+    incidentes(tipo: TipoIncidente, fecha: String): [Incidente!]!
+}
+
+type Mutation {
+    reportarIncidente(input: ReportarIncidenteInput!): Incidente!
+}

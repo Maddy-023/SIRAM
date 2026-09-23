@@ -1,0 +1,7 @@
+com\siram\notificacion\dto\CoordenadasDTO.class
+com\siram\notificacion\model\TipoIncidente.class
+com\siram\notificacion\NotificacionApplication.class
+com\siram\notificacion\repository\EventoProcesadoRepository.class
+com\siram\notificacion\model\EventoProcesado.class
+com\siram\notificacion\dto\IncidenteEvent.class
+com\siram\notificacion\config\MapeoProperties.class

@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: graphql-gateway
+  graphql:
+    graphiql:
+      enabled: true
+
+emergencias:
+  service-url: ${EMERGENCIAS_SERVICE_URL:http://localhost:8081}
