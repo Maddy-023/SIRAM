@@ -1,7 +1,7 @@
-// EmergenciasRestClient.java
+// EmergenciasRestClient.java (ACTUALIZADO)
+// Reemplaza el archivo en: graphql-gateway/src/main/java/com/siram/gateway/client/
 package com.siram.gateway.client;
 
-import com.siram.gateway.dto.CoordenadasDTO;
 import com.siram.gateway.dto.IncidenteDTO;
 import com.siram.gateway.dto.IncidenteInputDTO;
 import com.siram.gateway.dto.IncidenteRestDTO;
@@ -38,6 +38,8 @@ public class EmergenciasRestClient {
         return incidentes;
     }
 
+    // Ya no hay que "traducir" de plano a anidado: ahora emergencias-service
+    // responde directamente con ubicacion anidada, igual que espera GraphQL.
     private IncidenteDTO map(IncidenteRestDTO response) {
         if (response == null) {
             return null;
@@ -47,11 +49,7 @@ public class EmergenciasRestClient {
         dto.setId(response.getId());
         dto.setTipo(response.getTipo());
         dto.setFechaHora(response.getFechaHora());
-
-        CoordenadasDTO coordenadas = new CoordenadasDTO();
-        coordenadas.setLatitud(response.getUbicacionLat());
-        coordenadas.setLongitud(response.getUbicacionLng());
-        dto.setUbicacion(coordenadas);
+        dto.setUbicacion(response.getUbicacion());
 
         return dto;
     }

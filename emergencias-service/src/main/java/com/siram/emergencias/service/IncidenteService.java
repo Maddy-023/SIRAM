@@ -1,4 +1,5 @@
-// IncidenteService.java
+// IncidenteService.java (ACTUALIZADO)
+// Reemplaza el archivo en: emergencias-service/src/main/java/com/siram/emergencias/service/
 package com.siram.emergencias.service;
 
 import com.siram.emergencias.dto.*;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class IncidenteService {
 
     @Transactional
     @SuppressWarnings("null")
-    public Incidente registrarIncidente(IncidenteInputDTO dto) {
+    public IncidenteResponseDTO registrarIncidente(IncidenteInputDTO dto) {
         Incidente incidente = Incidente.builder()
                 .tipo(dto.getTipo())
                 .ubicacionLat(dto.getUbicacion().getLatitud())
@@ -34,7 +36,7 @@ public class IncidenteService {
         Incidente guardado = incidenteRepository.save(Objects.requireNonNull(incidente, "El incidente no puede ser nulo"));
 
         // Publicar evento en Kafka
-       IncidenteEvent event = IncidenteEvent.builder()
+        IncidenteEvent event = IncidenteEvent.builder()
                 .eventId(guardado.getId())
                 .tipo(guardado.getTipo())
                 .ubicacion(dto.getUbicacion())
@@ -44,13 +46,31 @@ public class IncidenteService {
         String key = Objects.requireNonNull(guardado.getId(), "El id del incidente no puede ser nulo").toString();
         kafkaTemplate.send("incident-reported", key, event);
 
-        return guardado;
+        return toResponseDTO(guardado);
     }
 
-    public List<Incidente> listarIncidentes(TipoIncidente tipo) {
-        if (tipo != null) {
-            return incidenteRepository.findByTipo(tipo);
-        }
-        return incidenteRepository.findAll();
+    public List<IncidenteResponseDTO> listarIncidentes(TipoIncidente tipo) {
+        List<Incidente> incidentes = (tipo != null)
+                ? incidenteRepository.findByTipo(tipo)
+                : incidenteRepository.findAll();
+
+        return incidentes.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Traduce la entidad (campos planos ubicacionLat/ubicacionLng) al formato
+    // que promete el contrato OpenAPI (ubicacion: {latitud, longitud} anidado).
+    private IncidenteResponseDTO toResponseDTO(Incidente incidente) {
+        CoordenadasDTO ubicacion = new CoordenadasDTO();
+        ubicacion.setLatitud(incidente.getUbicacionLat());
+        ubicacion.setLongitud(incidente.getUbicacionLng());
+
+        return IncidenteResponseDTO.builder()
+                .id(incidente.getId())
+                .tipo(incidente.getTipo())
+                .ubicacion(ubicacion)
+                .fechaHora(incidente.getFechaHora())
+                .build();
     }
 }

@@ -1,8 +1,9 @@
-// IncidenteController.java
+// IncidenteController.java (ACTUALIZADO)
+// Reemplaza el archivo en: emergencias-service/src/main/java/com/siram/emergencias/controller/
 package com.siram.emergencias.controller;
 
 import com.siram.emergencias.dto.IncidenteInputDTO;
-import com.siram.emergencias.model.Incidente;
+import com.siram.emergencias.dto.IncidenteResponseDTO;
 import com.siram.emergencias.model.TipoIncidente;
 import com.siram.emergencias.service.IncidenteService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,13 @@ public class IncidenteController {
     private final IncidenteService incidenteService;
 
     @PostMapping
-    public ResponseEntity<Incidente> registrar(@RequestBody IncidenteInputDTO input) {
-        Incidente nuevo = incidenteService.registrarIncidente(input);
+    public ResponseEntity<IncidenteResponseDTO> registrar(@RequestBody IncidenteInputDTO input) {
+        IncidenteResponseDTO nuevo = incidenteService.registrarIncidente(input);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
     }
 
     @GetMapping
-    public ResponseEntity<List<Incidente>> listar(@RequestParam(required = false) TipoIncidente tipo) {
+    public ResponseEntity<List<IncidenteResponseDTO>> listar(@RequestParam(required = false) TipoIncidente tipo) {
         return ResponseEntity.ok(incidenteService.listarIncidentes(tipo));
     }
 }
