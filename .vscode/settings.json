@@ -1,17 +1,6 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.import.gradle.enabled": false,
-  "java.project.sourcePaths": [
-    "emergencias-service/src/main/java",
-    "graphql-gateway/src/main/java",
-    "notificacion-service/src/main/java"
-  ],
-  "java.configuration.runtimes": [
-    {
-      "name": "JavaSE-17",
-      "path": "C:\\Users\\maudy\\AppData\\Roaming\\Code\\User\\globalStorage\\pleiades.java-extension-pack-jdk\\java\\latest"
-    }
-  ],
   "files.exclude": {
     "**/target": true,
     "**/bin": true
