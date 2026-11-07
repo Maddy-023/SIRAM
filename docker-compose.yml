@@ -101,6 +101,15 @@ services:
     environment:
       EMERGENCIAS_SERVICE_URL: http://emergencias-service:8081
 
+  frontend:
+    build: ./frontend
+    container_name: siram-frontend
+    logging: *default-logging
+    depends_on:
+      - graphql-gateway
+    ports:
+      - "5173:80"
+
 volumes:
   emergencias-db-data:
   notificacion-db-data:
