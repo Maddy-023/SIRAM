@@ -1,1 +1,8 @@
+com\siram\gateway\dto\IncidenteDTO.class
+com\siram\gateway\dto\IncidenteRestDTO.class
+com\siram\gateway\dto\TipoIncidente.class
 com\siram\gateway\GraphqlGatewayApplication.class
+com\siram\gateway\client\EmergenciasRestClient.class
+com\siram\gateway\dto\CoordenadasDTO.class
+com\siram\gateway\dto\IncidenteInputDTO.class
+com\siram\gateway\controller\IncidenteGraphQLController.class

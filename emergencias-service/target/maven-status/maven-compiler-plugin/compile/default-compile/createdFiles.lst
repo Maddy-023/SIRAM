@@ -1,1 +1,14 @@
+com\siram\emergencias\dto\IncidenteEvent$IncidenteEventBuilder.class
+com\siram\emergencias\model\Incidente.class
+com\siram\emergencias\exception\IncidenteNoEncontradoException.class
+com\siram\emergencias\controller\IncidenteController.class
+com\siram\emergencias\dto\IncidenteInputDTO.class
 com\siram\emergencias\EmergenciasApplication.class
+com\siram\emergencias\dto\IncidenteResponseDTO.class
+com\siram\emergencias\model\TipoIncidente.class
+com\siram\emergencias\dto\CoordenadasDTO.class
+com\siram\emergencias\model\Incidente$IncidenteBuilder.class
+com\siram\emergencias\dto\IncidenteResponseDTO$IncidenteResponseDTOBuilder.class
+com\siram\emergencias\service\IncidenteService.class
+com\siram\emergencias\dto\IncidenteEvent.class
+com\siram\emergencias\repository\IncidenteRepository.class

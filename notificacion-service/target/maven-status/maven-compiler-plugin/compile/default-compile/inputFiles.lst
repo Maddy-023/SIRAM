@@ -1,8 +1,8 @@
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\config\MapeoProperties.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\dto\CoordenadasDTO.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\dto\IncidenteEvent.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\model\EventoProcesado.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\model\TipoIncidente.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\NotificacionApplication.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\repository\EventoProcesadoRepository.java
-U:\Octavo Semestre\Programación Avanzada\Segundo Corte\Entregas\SIRAM\notificacion-service\src\main\java\com\siram\notificacion\service\KafkaConsumerService.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\config\MapeoProperties.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\dto\CoordenadasDTO.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\dto\IncidenteEvent.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\model\EventoProcesado.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\model\TipoIncidente.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\NotificacionApplication.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\repository\EventoProcesadoRepository.java
+S:\universidad\Programacion Avanzada\proyecto\SIRAM-main\notificacion-service\src\main\java\com\siram\notificacion\service\KafkaConsumerService.java
