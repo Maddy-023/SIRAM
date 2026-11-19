@@ -22,10 +22,11 @@ npm run dev
 Abre <http://localhost:5173>. Vite reenvía `/graphql` al Gateway en
 `http://localhost:8080/graphql`.
 
-Para registrar un incidente, permite al navegador acceder a la ubicación del
-dispositivo. La ubicación se obtiene al tocar el botón y solo se envía al crear
-el reporte. El navegador puede requerir una conexión segura para compartirla;
-`localhost` se considera segura durante el desarrollo.
+Para registrar un incidente, el formulario explica por qué necesita la ubicación
+antes de solicitar el permiso del navegador. La ubicación es necesaria para
+enviar el reporte y solo se comparte al crearlo. El navegador puede requerir
+una conexión segura para compartirla; `localhost` se considera segura durante
+el desarrollo.
 
 ## Docker Compose
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { createIncident, listIncidents } from "./graphql";
 import { incidentTypes, type Incident, type IncidentType } from "./types";
 
@@ -26,12 +26,25 @@ function App() {
   const [longitude, setLongitude] = useState("");
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
   const [locating, setLocating] = useState(false);
+  const [locationPromptOpen, setLocationPromptOpen] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [listError, setListError] = useState("");
   const [formError, setFormError] = useState("");
   const [locationError, setLocationError] = useState("");
   const [success, setSuccess] = useState("");
+  const locationDialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = locationDialogRef.current;
+    if (!dialog) return;
+
+    if (locationPromptOpen && !dialog.open) {
+      dialog.showModal();
+    } else if (!locationPromptOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [locationPromptOpen]);
 
   const refreshIncidents = useCallback(async (type: IncidentType | "") => {
     setLoadingList(true);
@@ -58,12 +71,15 @@ function App() {
     setLocationError("");
     setFormError("");
     setSuccess("");
+    setLocationPromptOpen(true);
+  }
 
+  function requestLocation() {
     if (!navigator.geolocation) {
       setLatitude("");
       setLongitude("");
       setLocationAccuracy(null);
-      setLocationError("Este dispositivo no permite obtener la ubicación automáticamente.");
+      setLocationError("Este dispositivo no puede compartir su ubicación. Sin ella no es posible enviar el reporte.");
       return;
     }
 
@@ -82,15 +98,27 @@ function App() {
       (error) => {
         setLocating(false);
         if (error.code === error.PERMISSION_DENIED) {
-          setLocationError("No se permitió acceder a la ubicación. Actívala en los permisos del navegador y vuelve a intentarlo.");
+          setLocationError("Sin permiso para acceder a tu ubicación no es posible enviar el reporte. Activa el permiso en tu navegador y vuelve a intentarlo.");
         } else if (error.code === error.POSITION_UNAVAILABLE) {
-          setLocationError("No se pudo determinar tu ubicación. Revisa que la ubicación del dispositivo esté activada.");
+          setLocationError("No pudimos encontrar tu ubicación. Revisa que esté activada en el dispositivo e inténtalo de nuevo.");
         } else {
-          setLocationError("La ubicación tardó demasiado en obtenerse. Acércate al lugar e inténtalo de nuevo.");
+          setLocationError("No pudimos obtener tu ubicación a tiempo. Acércate al lugar del incidente e inténtalo de nuevo.");
         }
       },
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 },
     );
+  }
+
+  function confirmLocationRequest() {
+    setLocationPromptOpen(false);
+    requestLocation();
+  }
+
+  function cancelLocationRequest() {
+    setLocationPromptOpen(false);
+    if (!latitude || !longitude) {
+      setLocationError("La ubicación es necesaria para enviar un reporte. Puedes volver a intentarlo cuando quieras.");
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -103,7 +131,7 @@ function App() {
       return;
     }
     if (!latitude || !longitude) {
-      setFormError("Primero obtén la ubicación del lugar del incidente.");
+      setFormError("Necesitas compartir la ubicación del incidente para poder enviar el reporte.");
       return;
     }
 
@@ -316,6 +344,36 @@ function App() {
         <span>© {new Date().getFullYear()} SIRAM · Sistema de atención municipal</span>
         <span>Atención ciudadana</span>
       </footer>
+      <dialog
+        ref={locationDialogRef}
+        className="location-dialog"
+        aria-labelledby="location-dialog-title"
+        aria-describedby="location-dialog-description"
+        onCancel={(event) => {
+          event.preventDefault();
+          cancelLocationRequest();
+        }}
+      >
+        <div className="location-dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
+            <circle cx="12" cy="10" r="2.5" />
+          </svg>
+        </div>
+        <h2 id="location-dialog-title">Necesitamos tu ubicación</h2>
+        <p id="location-dialog-description">
+          La usamos para indicar dónde ocurre el incidente. Si continúas, tu navegador puede pedirte permiso.
+          Solo se comparte al enviar el reporte.
+        </p>
+        <div className="location-dialog-actions">
+          <button className="location-cancel-button" type="button" onClick={cancelLocationRequest}>
+            Ahora no
+          </button>
+          <button className="location-confirm-button" type="button" onClick={confirmLocationRequest} autoFocus>
+            Continuar
+          </button>
+        </div>
+      </dialog>
     </div>
   );
 }

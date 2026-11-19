@@ -114,6 +114,17 @@ h2 { margin: 0; color: #1d3545; font: 700 16px "Manrope", sans-serif; letter-spa
 .location-feedback { margin: 9px 0 0; padding: 9px 11px; border-radius: 7px; font-size: 11px; line-height: 1.5; }
 .location-ready { color: #24715e; background: #eaf7ef; }
 .location-failed { color: #a7473d; background: #fff0ed; }
+.location-dialog { width: min(420px, calc(100% - 32px)); padding: 27px; color: var(--ink); border: 1px solid #e3eaea; border-radius: 14px; box-shadow: 0 22px 70px rgba(16, 45, 64, .22); }
+.location-dialog::backdrop { background: rgba(16, 35, 47, .48); backdrop-filter: blur(2px); }
+.location-dialog-icon { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 15px; color: var(--teal); background: #eaf5f1; border-radius: 12px; }
+.location-dialog-icon svg { width: 23px; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.location-dialog h2 { margin: 0; font-size: 19px; }
+.location-dialog > p { margin: 11px 0 22px; color: #687b84; font-size: 13px; line-height: 1.65; }
+.location-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.location-dialog-actions button { min-height: 42px; padding: 0 17px; border-radius: 7px; font-size: 12px; font-weight: 700; }
+.location-cancel-button { color: #536873; background: #fff; border: 1px solid #dfe6e8; }
+.location-confirm-button { color: #fff; background: var(--teal); border: 1px solid var(--teal); }
+.location-cancel-button:focus-visible, .location-confirm-button:focus-visible { outline: 3px solid #b9e1d7; outline-offset: 2px; }
 .form-message { padding: 10px 12px; border-radius: 7px; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
 .error-message { color: #a7473d; background: #fff0ed; border: 1px solid #f5d6ce; }
 .success-message { color: #24715e; background: #eaf7ef; border: 1px solid #cfe9d9; }

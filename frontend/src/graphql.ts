@@ -5,6 +5,9 @@ interface GraphqlResponse<T> {
   errors?: Array<{ message: string }>;
 }
 
+const requestErrorMessage =
+  "No pudimos comunicarnos con el sistema en este momento. Inténtalo nuevamente en unos minutos.";
+
 async function request<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
   let response: Response;
   try {
@@ -14,18 +17,21 @@ async function request<T>(query: string, variables?: Record<string, unknown>): P
       body: JSON.stringify({ query, variables }),
     });
   } catch {
-    throw new Error("No se pudo conectar con el servicio. Verifica que el entorno esté iniciado.");
+    throw new Error(requestErrorMessage);
   }
 
-  const result = (await response.json()) as GraphqlResponse<T>;
   if (!response.ok) {
-    throw new Error(`El servicio respondió con el estado ${response.status}.`);
+    throw new Error(requestErrorMessage);
   }
-  if (result.errors?.length) {
-    throw new Error(result.errors.map((error) => error.message).join(". "));
+
+  let result: GraphqlResponse<T>;
+  try {
+    result = (await response.json()) as GraphqlResponse<T>;
+  } catch {
+    throw new Error(requestErrorMessage);
   }
-  if (!result.data) {
-    throw new Error("El servicio devolvió una respuesta vacía.");
+  if (result.errors?.length || !result.data) {
+    throw new Error(requestErrorMessage);
   }
   return result.data;
 }
