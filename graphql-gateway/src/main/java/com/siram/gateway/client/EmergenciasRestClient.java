@@ -7,6 +7,7 @@ import com.siram.gateway.dto.IncidenteInputDTO;
 import com.siram.gateway.dto.IncidenteRestDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -26,9 +27,17 @@ public class EmergenciasRestClient {
         return map(response);
     }
 
-    public List<IncidenteDTO> listar(String tipo) {
-        String url = emergenciasServiceUrl + "/api/incidentes" + (tipo != null ? "?tipo=" + tipo : "");
-        IncidenteRestDTO[] response = restTemplate.getForObject(url, IncidenteRestDTO[].class);
+    public List<IncidenteDTO> listar(String tipo, String fecha) {
+        UriComponentsBuilder url = UriComponentsBuilder
+                .fromUriString(emergenciasServiceUrl.replaceAll("/+$", "") + "/api/incidentes");
+        if (tipo != null) {
+            url.queryParam("tipo", tipo);
+        }
+        if (fecha != null) {
+            url.queryParam("fecha", fecha);
+        }
+
+        IncidenteRestDTO[] response = restTemplate.getForObject(url.build().encode().toUri(), IncidenteRestDTO[].class);
         List<IncidenteDTO> incidentes = new ArrayList<>();
         if (response != null) {
             for (IncidenteRestDTO item : response) {

@@ -43,12 +43,12 @@ const incidentFields = `
   fechaHora
 `;
 
-export async function listIncidents(tipo?: IncidentType): Promise<Incident[]> {
+export async function listIncidents(tipo?: IncidentType, fecha?: string): Promise<Incident[]> {
   const data = await request<{ incidentes: Incident[] }>(
-    `query ListarIncidentes($tipo: TipoIncidente) {
-      incidentes(tipo: $tipo) { ${incidentFields} }
+    `query ListarIncidentes($tipo: TipoIncidente, $fecha: String) {
+      incidentes(tipo: $tipo, fecha: $fecha) { ${incidentFields} }
     }`,
-    { tipo: tipo || null },
+    { tipo: tipo || null, fecha: fecha || null },
   );
   return data.incidentes;
 }

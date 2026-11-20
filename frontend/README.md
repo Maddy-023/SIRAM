@@ -1,6 +1,6 @@
 # SIRAM frontend
 
-Interfaz web ciudadana para registrar incidentes y consultar reportes por tipo.
+Interfaz web ciudadana para registrar incidentes y consultar reportes por tipo y fecha.
 Se comunica con el Gateway GraphQL y usa únicamente los campos definidos por su
 esquema actual.
 

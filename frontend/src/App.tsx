@@ -21,12 +21,14 @@ function formatDate(value: string) {
 function App() {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [filterType, setFilterType] = useState<IncidentType | "">("");
+  const [filterDate, setFilterDate] = useState("");
   const [formType, setFormType] = useState<IncidentType | "">("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [locationAccuracy, setLocationAccuracy] = useState<number | null>(null);
   const [locating, setLocating] = useState(false);
   const [locationPromptOpen, setLocationPromptOpen] = useState(false);
+  const [reportConfirmationOpen, setReportConfirmationOpen] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [listError, setListError] = useState("");
@@ -34,6 +36,7 @@ function App() {
   const [locationError, setLocationError] = useState("");
   const [success, setSuccess] = useState("");
   const locationDialogRef = useRef<HTMLDialogElement>(null);
+  const reportDialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const dialog = locationDialogRef.current;
@@ -46,11 +49,22 @@ function App() {
     }
   }, [locationPromptOpen]);
 
-  const refreshIncidents = useCallback(async (type: IncidentType | "") => {
+  useEffect(() => {
+    const dialog = reportDialogRef.current;
+    if (!dialog) return;
+
+    if (reportConfirmationOpen && !dialog.open) {
+      dialog.showModal();
+    } else if (!reportConfirmationOpen && dialog.open) {
+      dialog.close();
+    }
+  }, [reportConfirmationOpen]);
+
+  const refreshIncidents = useCallback(async (type: IncidentType | "", date: string) => {
     setLoadingList(true);
     setListError("");
     try {
-      setIncidents(await listIncidents(type || undefined));
+      setIncidents(await listIncidents(type || undefined, date || undefined));
     } catch (error) {
       setListError(error instanceof Error ? error.message : "No se pudieron cargar los reportes.");
     } finally {
@@ -59,8 +73,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    void refreshIncidents(filterType);
-  }, [filterType, refreshIncidents]);
+    void refreshIncidents(filterType, filterDate);
+  }, [filterType, filterDate, refreshIncidents]);
 
   const sortedIncidents = useMemo(
     () => [...incidents].sort((a, b) => Date.parse(b.fechaHora) - Date.parse(a.fechaHora)),
@@ -121,7 +135,7 @@ function App() {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError("");
     setSuccess("");
@@ -135,10 +149,22 @@ function App() {
       return;
     }
 
+    setReportConfirmationOpen(true);
+  }
+
+  async function confirmReport() {
+    const type = formType;
+    if (!type || !latitude || !longitude) {
+      setReportConfirmationOpen(false);
+      setFormError("Revisa el tipo de incidente y la ubicación antes de enviarlo.");
+      return;
+    }
+
+    setReportConfirmationOpen(false);
     setSubmitting(true);
     try {
       const created = await createIncident({
-        tipo: formType,
+        tipo: type,
         ubicacion: { latitud: Number(latitude), longitud: Number(longitude) },
       });
       setSuccess(`Reporte registrado correctamente. Código: ${created.id}`);
@@ -147,16 +173,21 @@ function App() {
       setLongitude("");
       setLocationAccuracy(null);
       setLocationError("");
-      if (filterType && filterType !== created.tipo) {
+      if ((filterType && filterType !== created.tipo) || filterDate) {
         setFilterType("");
+        setFilterDate("");
       } else {
-        await refreshIncidents(filterType);
+        await refreshIncidents(filterType, filterDate);
       }
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "No fue posible registrar el reporte.");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function cancelReportConfirmation() {
+    setReportConfirmationOpen(false);
   }
 
   return (
@@ -276,20 +307,32 @@ function App() {
                   <h2 id="incidents-title">Reportes registrados</h2>
                 </div>
               </div>
-              <button className="refresh-button" type="button" onClick={() => void refreshIncidents(filterType)} disabled={loadingList} aria-label="Actualizar reportes">
+              <button className="refresh-button" type="button" onClick={() => void refreshIncidents(filterType, filterDate)} disabled={loadingList} aria-label="Actualizar reportes">
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M5.5 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.5-3" /></svg>
               </button>
             </div>
 
             <div className="list-toolbar">
               <span>{loadingList ? "Cargando reportes" : `${incidents.length} ${incidents.length === 1 ? "reporte" : "reportes"}`}</span>
-              <label className="filter-control">
-                <span className="visually-hidden">Filtrar por tipo</span>
-                <select value={filterType} onChange={(event) => setFilterType(event.target.value as IncidentType | "")}>
-                  <option value="">Todos los tipos</option>
-                  {incidentTypes.map((type) => <option key={type} value={type}>{typeLabels[type]}</option>)}
-                </select>
-              </label>
+              <div className="filter-controls">
+                <label className="filter-control">
+                  <span className="visually-hidden">Filtrar por tipo</span>
+                  <select value={filterType} onChange={(event) => setFilterType(event.target.value as IncidentType | "")}>
+                    <option value="">Todos los tipos</option>
+                    {incidentTypes.map((type) => <option key={type} value={type}>{typeLabels[type]}</option>)}
+                  </select>
+                </label>
+                <label className="filter-date-control">
+                  <span className="visually-hidden">Filtrar por fecha</span>
+                  <input
+                    type="date"
+                    value={filterDate}
+                    onChange={(event) => setFilterDate(event.target.value)}
+                    aria-label="Filtrar por fecha"
+                    title="Filtrar por fecha"
+                  />
+                </label>
+              </div>
             </div>
 
             {listError ? (
@@ -297,7 +340,7 @@ function App() {
                 <span className="empty-symbol">!</span>
                 <strong>No se pudieron cargar los reportes</strong>
                 <p>{listError}</p>
-                <button type="button" className="text-button" onClick={() => void refreshIncidents(filterType)}>Intentar de nuevo</button>
+                <button type="button" className="text-button" onClick={() => void refreshIncidents(filterType, filterDate)}>Intentar de nuevo</button>
               </div>
             ) : loadingList ? (
               <div className="loading-state" aria-live="polite">
@@ -371,6 +414,36 @@ function App() {
           </button>
           <button className="location-confirm-button" type="button" onClick={confirmLocationRequest} autoFocus>
             Continuar
+          </button>
+        </div>
+      </dialog>
+      <dialog
+        ref={reportDialogRef}
+        className="location-dialog"
+        aria-labelledby="report-dialog-title"
+        aria-describedby="report-dialog-description"
+        onCancel={(event) => {
+          event.preventDefault();
+          cancelReportConfirmation();
+        }}
+      >
+        <div className="location-dialog-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 3 21 19H3L12 3Z" />
+            <path d="M12 9v4m0 3h.01" />
+          </svg>
+        </div>
+        <h2 id="report-dialog-title">Confirma tu reporte</h2>
+        <p id="report-dialog-description">
+          Vas a reportar: <strong>{formType ? typeLabels[formType] : ""}</strong>. Se enviará el tipo de incidente y
+          la ubicación que compartiste. ¿Deseas continuar?
+        </p>
+        <div className="location-dialog-actions">
+          <button className="location-cancel-button" type="button" onClick={cancelReportConfirmation} disabled={submitting}>
+            Volver
+          </button>
+          <button className="location-confirm-button" type="button" onClick={() => void confirmReport()} disabled={submitting}>
+            {submitting ? "Enviando reporte…" : "Confirmar y enviar"}
           </button>
         </div>
       </dialog>
